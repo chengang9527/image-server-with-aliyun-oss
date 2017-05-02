@@ -1,0 +1,7 @@
+/documentation/
+/tmp/
+*.iml
+*.ipr
+*.iws
+/.idea/
+/target/
