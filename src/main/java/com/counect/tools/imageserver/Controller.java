@@ -41,6 +41,8 @@ public class Controller {
   private String OSS_ACCESS_KEY_SECRET;
   @Value("${oss-bucket-name}")
   private String OSS_BUCKET_NAME;
+  @Value("${image-max-size}")
+  private String IMAGE_MAX_SIZE;
 
   private boolean uploadFileToOSS(File file, String filename) {
     OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
@@ -96,7 +98,7 @@ public class Controller {
   private void convertImage(File local) throws IOException {
     try {
       Runtime.getRuntime().exec(String
-          .format("gm convert -strip -resize 1024x1024 %s %s", local.getAbsolutePath(),
+          .format("gm convert -strip -resize %s %s %s",IMAGE_MAX_SIZE, local.getAbsolutePath(),
               local.getAbsolutePath())).waitFor();
     } catch (InterruptedException e) {
       LOGGER.error(e.getMessage(), e);//It should not happen.
