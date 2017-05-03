@@ -43,6 +43,8 @@ public class Controller {
   private String OSS_BUCKET_NAME;
   @Value("${image-max-size}")
   private String IMAGE_MAX_SIZE;
+  @Value("${base-url}")
+  private String BASE_URL;
 
   private boolean uploadFileToOSS(File file, String filename) {
     OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
@@ -56,7 +58,7 @@ public class Controller {
       LOGGER.error("OSS can not connected.", e);
       return false;
     } catch (OSSException e) {
-      LOGGER.error(String.format("Code:%s\nMessage:%s\nRequestId:%s\nHostId:%s", e.getErrorCode(),
+      LOGGER.error(String.format("Code:%s%nMessage:%s%nRequestId:%s%nHostId:%s", e.getErrorCode(),
           e.getErrorMessage(), e.getRequestId(), e.getHostId()), e);
       return false;
     } finally {
@@ -75,7 +77,7 @@ public class Controller {
     } catch (ClientException e) {
       LOGGER.error("OSS can not connected.", e);
     } catch (OSSException e) {
-      LOGGER.error(String.format("Code:%s\nMessage:%s\nRequestId:%s\nHostId:%s", e.getErrorCode(),
+      LOGGER.error(String.format("Code:%s%nMessage:%s%nRequestId:%s%nHostId:%s", e.getErrorCode(),
           e.getErrorMessage(), e.getRequestId(), e.getHostId()), e);
     } finally {
       client.shutdown();
@@ -84,7 +86,7 @@ public class Controller {
   }
 
   @PostMapping
-  public void upload(MultipartFile file) throws IOException {
+  public String upload(MultipartFile file) throws IOException {
     String filename = generateFilename(file);
     File local = saveFileToLocal(file,filename);
     if (FilenameUtils.isExtension(filename, SHOULD_FORMATTED_IMAGE_EXTENSIONS)) {
@@ -93,6 +95,7 @@ public class Controller {
     File formattedFile = new File(local.getAbsolutePath());
     uploadFileToOSS(formattedFile, filename);
     FileUtils.deleteQuietly(formattedFile);
+    return BASE_URL+filename;
   }
 
   private void convertImage(File local) throws IOException {
