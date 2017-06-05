@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * Created by mayan on 17-4-27.
  */
-@RestController
+@org.springframework.stereotype.Controller
 public class Controller {
 
   private static final String FILE_NAME_FORMAT = "%s-%s.%s";
@@ -66,8 +67,8 @@ public class Controller {
     }
   }
 
-  @GetMapping("/")
-  public String image(String filename) {
+  @GetMapping("/{filename}")
+  public String image(@PathVariable String filename) {
     OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
     String query = "";
     try {
