@@ -66,7 +66,7 @@ public class Controller {
     }
   }
 
-  @GetMapping
+  @GetMapping("/")
   public String image(String filename) {
     OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
     String query = "";
@@ -85,7 +85,7 @@ public class Controller {
     return "redirect:" + IMAGE_SERVER + filename + query;
   }
 
-  @PostMapping
+  @PostMapping("/")
   public String upload(MultipartFile file) throws IOException {
     String filename = generateFilename(file);
     File local = saveFileToLocal(file,filename);
