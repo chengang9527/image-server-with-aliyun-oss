@@ -11,7 +11,4 @@ URL: http://img.counect.com/
 
 返回说明：
 ```
-```
-{url}
-```
-```
+```{url}```
