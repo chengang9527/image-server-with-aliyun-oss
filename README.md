@@ -5,11 +5,13 @@
 
 METHOD:POST
 
-URL:
+URL: http://img.counect.com/
 
 参数名：file
 
 返回说明：
 ```
+```
 {url}
+```
 ```
