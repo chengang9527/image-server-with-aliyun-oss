@@ -24,9 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Created by mayan on 17-4-27.
- */
 @Controller
 public class AppController {
 
@@ -49,21 +46,18 @@ public class AppController {
   @Value("${base-url}")
   private String BASE_URL;
 
-  private boolean uploadFileToOSS(File file, String filename) {
+  private void uploadFileToOSS(File file, String filename) {
     OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
     try {
       ObjectMetadata om = new ObjectMetadata();
-      om.setContentType(MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file));
+      om.setContentType(MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename));
       om.setLastModified(new Date());
       client.putObject(OSS_BUCKET_NAME, filename, file, om);
-      return true;
     } catch (ClientException e) {
       LOGGER.error("OSS can not connected.", e);
-      return false;
     } catch (OSSException e) {
       LOGGER.error(String.format("Code:%s%nMessage:%s%nRequestId:%s%nHostId:%s", e.getErrorCode(),
           e.getErrorMessage(), e.getRequestId(), e.getHostId()), e);
-      return false;
     } finally {
       client.shutdown();
     }
@@ -97,9 +91,7 @@ public class AppController {
       convertImage(local);
     }
     File formattedFile = new File(local.getAbsolutePath());
-    System.out.println("upload to oss");
     uploadFileToOSS(formattedFile, filename);
-    System.out.println("upload to oss finished");
     FileUtils.deleteQuietly(formattedFile);
     return BASE_URL + filename;
   }
