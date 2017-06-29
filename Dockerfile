@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine
-EXPOSE 8080
-ADD target/*.jar app.jar
-ENV MAGICK_HOME=/usr
 RUN apk add --no-cache imagemagick
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENV MAGICK_HOME=/usr
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","-Dserver.port=8080","/app.jar"]
+ADD target/*.jar app.jar

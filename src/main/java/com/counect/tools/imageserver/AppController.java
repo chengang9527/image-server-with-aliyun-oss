@@ -16,17 +16,18 @@ import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Created by mayan on 17-4-27.
  */
-@org.springframework.stereotype.Controller
-public class Controller {
+@Controller
+public class AppController {
 
   private static final String FILE_NAME_FORMAT = "%s-%s.%s";
   private static final String[] SHOULD_FORMATTED_IMAGE_EXTENSIONS = {"jpeg", "jpg", "png"};
@@ -67,7 +68,7 @@ public class Controller {
     }
   }
 
-  @GetMapping("/{filename}")
+  @GetMapping("/{filename:.*?}")
   public String image(@PathVariable String filename) {
     OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
     String query = "";
@@ -86,30 +87,33 @@ public class Controller {
     return "redirect:" + IMAGE_SERVER + filename + query;
   }
 
+  @ResponseBody
   @PostMapping("/")
   public String upload(MultipartFile file) throws IOException {
     String filename = generateFilename(file);
-    File local = saveFileToLocal(file,filename);
+    File local = saveFileToLocal(file, filename);
     if (FilenameUtils.isExtension(filename, SHOULD_FORMATTED_IMAGE_EXTENSIONS)) {
       convertImage(local);
     }
     File formattedFile = new File(local.getAbsolutePath());
+    System.out.println("upload to oss");
     uploadFileToOSS(formattedFile, filename);
+    System.out.println("upload to oss finished");
     FileUtils.deleteQuietly(formattedFile);
-    return BASE_URL+filename;
+    return BASE_URL + filename;
   }
 
   private void convertImage(File local) throws IOException {
     try {
       Runtime.getRuntime().exec(String
-          .format("gm convert -strip -resize %s %s %s",IMAGE_MAX_SIZE, local.getAbsolutePath(),
+          .format("gm convert -strip -resize %s %s %s", IMAGE_MAX_SIZE, local.getAbsolutePath(),
               local.getAbsolutePath())).waitFor();
     } catch (InterruptedException e) {
       LOGGER.error(e.getMessage(), e);//It should not happen.
     }
   }
 
-  private File saveFileToLocal(MultipartFile file,String filename) throws IOException {
+  private File saveFileToLocal(MultipartFile file, String filename) throws IOException {
     File local = new File(filename);
     FileUtils.copyInputStreamToFile(file.getInputStream(), local);
     return local;
@@ -118,7 +122,7 @@ public class Controller {
   private String generateFilename(MultipartFile file) {
     String dateStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
     String randomStr = RandomStringUtils.randomAlphanumeric(6);
-    String extensionStr = FilenameUtils.getExtension(file.getName()).toLowerCase();
+    String extensionStr = FilenameUtils.getExtension(file.getOriginalFilename()).toLowerCase();
     return String.format(FILE_NAME_FORMAT, dateStr, randomStr, extensionStr);
   }
 }
