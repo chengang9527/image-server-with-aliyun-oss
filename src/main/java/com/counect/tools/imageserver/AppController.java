@@ -106,7 +106,7 @@ public class AppController {
   private void convertImage(File local) throws IOException {
     try {
       Runtime.getRuntime().exec(String
-          .format("gm convert -strip -resize %s %s %s", IMAGE_MAX_SIZE, local.getAbsolutePath(),
+          .format("convert -strip -resize %s %s %s", IMAGE_MAX_SIZE, local.getAbsolutePath(),
               local.getAbsolutePath())).waitFor();
     } catch (InterruptedException e) {
       LOGGER.error(e.getMessage(), e);//It should not happen.
