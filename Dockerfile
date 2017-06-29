@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM counect_data/openjdk-8-jre-alpine-fixed-timezone
 RUN apk add --no-cache imagemagick
 ENV MAGICK_HOME=/usr
 EXPOSE 8080
