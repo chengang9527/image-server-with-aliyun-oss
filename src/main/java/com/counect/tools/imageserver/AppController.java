@@ -20,7 +20,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,27 +31,27 @@ public class AppController {
   private static final Logger LOGGER = LoggerFactory.getLogger("image-server");
 
   @Value("${image-server}")
-  private String IMAGE_SERVER;
+  private String imageServer;
   @Value("${oss-endpoint}")
-  private String OSS_ENDPOINT;
+  private String ossEndPoint;
   @Value("${oss-access-key-id}")
-  private String OSS_ACCESS_KEY_ID;
+  private String ossAccessKeyId;
   @Value("${oss-access-key-secret}")
-  private String OSS_ACCESS_KEY_SECRET;
+  private String ossAccessKeySecret;
   @Value("${oss-bucket-name}")
-  private String OSS_BUCKET_NAME;
+  private String ossBucketName;
   @Value("${image-max-size}")
-  private String IMAGE_MAX_SIZE;
+  private String imageMaxSize;
   @Value("${base-url}")
-  private String BASE_URL;
+  private String baseUrl;
 
   private void uploadFileToOSS(File file, String filename) {
-    OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
+    OSSClient client = new OSSClient(ossEndPoint, ossAccessKeyId, ossAccessKeySecret);
     try {
       ObjectMetadata om = new ObjectMetadata();
       om.setContentType(MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename));
       om.setLastModified(new Date());
-      client.putObject(OSS_BUCKET_NAME, filename, file, om);
+      client.putObject(ossBucketName, filename, file, om);
     } catch (ClientException e) {
       LOGGER.error("OSS can not connected.", e);
     } catch (OSSException e) {
@@ -65,11 +64,11 @@ public class AppController {
 
   @GetMapping("/{filename:.*?}")
   public String image(@PathVariable String filename) {
-    OSSClient client = new OSSClient(OSS_ENDPOINT, OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET);
+    OSSClient client = new OSSClient(ossEndPoint, ossAccessKeyId, ossAccessKeySecret);
     String query = "";
     try {
       query = "?" + client
-          .generatePresignedUrl(OSS_BUCKET_NAME, filename, DateUtils.addHours(new Date(), 1))
+          .generatePresignedUrl(ossBucketName, filename, DateUtils.addHours(new Date(), 1))
           .getQuery();
     } catch (ClientException e) {
       LOGGER.error("OSS can not connected.", e);
@@ -79,12 +78,12 @@ public class AppController {
     } finally {
       client.shutdown();
     }
-    return "redirect:" + IMAGE_SERVER + filename + query;
+    return "redirect:" + imageServer + filename + query;
   }
 
   @ResponseBody
   @PostMapping("/")
-  public String upload(MultipartFile file) throws IOException {
+  public String upload(MultipartFile file) throws IOException, InterruptedException {
     String filename = generateFilename(file);
     File local = saveFileToLocal(file, filename);
     if (FilenameUtils.isExtension(filename, SHOULD_FORMATTED_IMAGE_EXTENSIONS)) {
@@ -93,17 +92,13 @@ public class AppController {
     File formattedFile = new File(local.getAbsolutePath());
     uploadFileToOSS(formattedFile, filename);
     FileUtils.deleteQuietly(formattedFile);
-    return BASE_URL + filename;
+    return baseUrl + filename;
   }
 
-  private void convertImage(File local) throws IOException {
-    try {
-      Runtime.getRuntime().exec(String
-          .format("convert -strip -resize '%s' %s %s", IMAGE_MAX_SIZE, local.getAbsolutePath(),
-              local.getAbsolutePath())).waitFor();
-    } catch (InterruptedException e) {
-      LOGGER.error(e.getMessage(), e);//It should not happen.
-    }
+  private void convertImage(File local) throws IOException, InterruptedException {
+    Runtime.getRuntime().exec(String
+        .format("convert -strip -resize '%s' %s %s", imageMaxSize, local.getAbsolutePath(),
+            local.getAbsolutePath())).waitFor();
   }
 
   private File saveFileToLocal(MultipartFile file, String filename) throws IOException {
