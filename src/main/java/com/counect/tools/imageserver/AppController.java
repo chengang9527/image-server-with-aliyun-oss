@@ -62,6 +62,11 @@ public class AppController {
     }
   }
 
+  @GetMapping("/crossdomain.xml",produces="text/xml;charset=UTF-8")
+  public String crossdomain(){
+    return "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\"/></cross-domain-policy>";
+  }
+
   @GetMapping("/{filename:.*?}")
   public String image(@PathVariable String filename) {
     OSSClient client = new OSSClient(ossEndPoint, ossAccessKeyId, ossAccessKeySecret);
