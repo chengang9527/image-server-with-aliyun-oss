@@ -65,7 +65,7 @@ public class AppController {
 
   @GetMapping("/**")
   public String image(HttpServletRequest request) {
-    return "redirect:" + imageServer + request.getContextPath();
+    return "redirect:" + imageServer + request.getServletPath();
   }
 
   @ResponseBody
