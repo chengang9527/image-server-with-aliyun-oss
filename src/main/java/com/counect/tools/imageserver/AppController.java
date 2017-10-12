@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -62,23 +63,9 @@ public class AppController {
     }
   }
 
-  @GetMapping("/{filename:.*?}")
-  public String image(@PathVariable String filename) {
-    OSSClient client = new OSSClient(ossEndPoint, ossAccessKeyId, ossAccessKeySecret);
-    String query = "";
-    try {
-      query = "?" + client
-          .generatePresignedUrl(ossBucketName, filename, DateUtils.addHours(new Date(), 1))
-          .getQuery();
-    } catch (ClientException e) {
-      LOGGER.error("OSS can not connected.", e);
-    } catch (OSSException e) {
-      LOGGER.error(String.format("Code:%s%nMessage:%s%nRequestId:%s%nHostId:%s", e.getErrorCode(),
-          e.getErrorMessage(), e.getRequestId(), e.getHostId()), e);
-    } finally {
-      client.shutdown();
-    }
-    return "redirect:" + imageServer + filename + query;
+  @GetMapping("/**")
+  public String image(HttpServletRequest request) {
+    return "redirect:" + imageServer + request.getContextPath();
   }
 
   @ResponseBody
