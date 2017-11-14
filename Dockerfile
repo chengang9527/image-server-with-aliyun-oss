@@ -1,5 +1,5 @@
-FROM registry.cn-hangzhou.aliyuncs.com/counect_data/openjdk-8-jre-alpine-fixed-timezone
-RUN apk add --no-cache imagemagick
+FROM mayan31370/openjdk-alpine-with-chinese-timezone:8-jre
+RUN sed -i 's/dl\-cdn\.alpinelinux\.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk add --no-cache imagemagick
 ENV MAGICK_HOME=/usr
 ENV IMAGE_SERVER=serverUrl
 ENV IMAGE_OSS_ENDPOINT=endPoint
