@@ -13,6 +13,3 @@ URL: http://img.counect.com/
 ```
 {url}
 ```
-
-# 阿里云仓库地址：
-registry.cn-hangzhou.aliyuncs.com/counect_data/image
