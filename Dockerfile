@@ -9,5 +9,5 @@ ENV IMAGE_OSS_BUCKET_NAME=bucketName
 ENV IMAGE_MAX_SIZE=1024x1024
 ENV IMAGE_BASE_URL=baseUrl
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","-Dserver.port=8080","/app.jar"]
+ENTRYPOINT ["java","-Xms128m","-Xmx128m","-jar","-Dserver.port=8080","/app.jar"]
 ADD target/*.jar app.jar
